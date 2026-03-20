@@ -1,0 +1,94 @@
+// prisma/schema.prisma
+// Schéma de base de données DigitalQ
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Ticket {
+  id            Int       @id @default(autoincrement())
+  ticketNumber  String    @unique
+  citizenName   String
+  citizenPhone  String
+  serviceId     Int
+  service       Service   @relation(fields: [serviceId], references: [id])
+  guichetId     Int?
+  guichet       Guichet?  @relation(fields: [guichetId], references: [id])
+  motif         String
+  status        String    @default("waiting")
+  // Status possibles : waiting | being_called | served | absent
+  priority      Boolean   @default(false)
+  estimatedWait Int?
+  actualWait    Int?
+  createdAt     DateTime  @default(now())
+  calledAt      DateTime?
+  servedAt      DateTime?
+  feedback      Feedback?
+
+  @@index([serviceId, status])
+  @@index([status])
+}
+
+model User {
+  id              Int      @id @default(autoincrement())
+  username        String   @unique
+  password        String   // bcrypt hashed
+  firstName       String
+  lastName        String
+  email           String   @unique
+  role            String   // 'agent' | 'admin'
+  assignedGuichet Int?
+  guichet         Guichet? @relation("UserGuichet", fields: [assignedGuichet], references: [id])
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+}
+
+model Service {
+  id             Int       @id @default(autoincrement())
+  name           String
+  code           String    @unique // EC, UR, FI, AS
+  avgServiceTime Int       @default(7)
+  isActive       Boolean   @default(true)
+  tickets        Ticket[]
+  guichets       Guichet[]
+}
+
+model Guichet {
+  id        Int      @id @default(autoincrement())
+  number    Int
+  serviceId Int
+  service   Service  @relation(fields: [serviceId], references: [id])
+  status    String   @default("inactive") // active | inactive | pause
+  agents    User[]   @relation("UserGuichet")
+  tickets   Ticket[]
+
+  @@unique([serviceId, number])
+}
+
+model Feedback {
+  id         Int      @id @default(autoincrement())
+  ticketId   Int      @unique
+  ticket     Ticket   @relation(fields: [ticketId], references: [id])
+  rating     Int      // 1-5
+  comment    String?
+  waitOk     Boolean?
+  agentKind  Boolean?
+  resolved   Boolean?
+  createdAt  DateTime @default(now())
+}
+
+model DailyStats {
+  id              Int      @id @default(autoincrement())
+  date            DateTime @unique
+  totalTickets    Int      @default(0)
+  totalServed     Int      @default(0)
+  totalAbsent     Int      @default(0)
+  avgWaitTime     Float?
+  avgSatisfaction Float?
+  peakHour        String?
+}
