@@ -18,19 +18,19 @@ const STATUTS = {
 async function genererNumeroTicket(serviceId) {
   const service = await prisma.service.findUnique({ where: { id: serviceId } })
 
-  // Compter tous les tickets du jour pour ce service
-  const debutJour = new Date()
-  debutJour.setHours(0, 0, 0, 0)
-
-  const count = await prisma.ticket.count({
-    where: {
-      serviceId,
-      createdAt: { gte: debutJour }
-    }
+  // Trouver le dernier ticket de ce service pour garantir un numéro unique
+  const dernierTicket = await prisma.ticket.findFirst({
+    where: { serviceId },
+    orderBy: { id: 'desc' }
   })
 
-  const numero = String(count + 1).padStart(3, '0')
-  return `${service.code}-${numero}`
+  let prochain = 1
+  if (dernierTicket) {
+    const dernierNum = parseInt(dernierTicket.ticketNumber.split('-')[1])
+    prochain = dernierNum + 1
+  }
+
+  return `${service.code}-${String(prochain).padStart(3, '0')}`
 }
 
 /**

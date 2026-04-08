@@ -1,6 +1,6 @@
 // src/pages/agent/LoginPage.jsx
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext'
@@ -11,15 +11,11 @@ export default function AgentLoginPage() {
   const [form, setForm] = useState({ username: '', password: '' })
   const [loading, setLoading] = useState(false)
 
-  // Déjà connecté → rediriger
-  if (user?.role === 'agent') {
-    navigate('/agent/dashboard', { replace: true })
-    return null
-  }
-  if (user?.role === 'admin') {
-    navigate('/admin/dashboard', { replace: true })
-    return null
-  }
+  // Déjà connecté → rediriger (dans useEffect pour éviter crash React 19)
+  useEffect(() => {
+    if (user?.role === 'agent') navigate('/agent/dashboard', { replace: true })
+    if (user?.role === 'admin') navigate('/admin/dashboard', { replace: true })
+  }, [user, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

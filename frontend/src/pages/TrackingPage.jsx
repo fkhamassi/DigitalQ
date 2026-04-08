@@ -163,11 +163,14 @@ export default function TrackingPage() {
 
     // Ticket traité ou absent
     const handleTicketCompleted = (ticketData) => {
-      // C'est notre ticket → redirection immédiate
+      // C'est notre ticket
       if (ticketData.ticketNumber === ticketNumber) {
         if (ticketData.action === 'served') {
           toast.success('✅ Votre dossier a été traité !', { duration: 3000 })
           setTimeout(() => navigate(`/feedback/${ticketData.id}`), 1500)
+        } else if (ticketData.action === 'absent') {
+          toast.error('⏰ Vous avez été marqué absent.', { duration: 6000 })
+          setData(prev => prev ? { ...prev, status: 'absent' } : prev)
         }
         return
       }
