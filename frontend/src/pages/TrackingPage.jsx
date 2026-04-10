@@ -9,92 +9,197 @@ import Badge from '../components/common/Badge'
 import { useSocket } from '../context/SocketContext'
 import api from '../api/axios'
 
-// ─── CARTE POSITION ──────────────────────────────────────────
-function PositionCard({ position, total }) {
+// ─── ICÔNES ──────────────────────────────────────────────────
+function IconClock() {
   return (
-    <div className="bg-gradient-to-br from-primary to-primary-dark text-white p-10 rounded-2xl text-center"
-         style={{ boxShadow: 'var(--shadow-xl)' }}>
-      <div className="text-sm uppercase tracking-widest opacity-75 mb-3 font-medium">
-        Votre position
-      </div>
-      <div className="flex items-end justify-center gap-1 mb-2">
-        <span className="text-8xl font-bold leading-none" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-          {position}
-        </span>
-        <span className="text-3xl font-medium opacity-75 mb-2">
-          {position === 1 ? 'er' : 'ème'}
-        </span>
-      </div>
-      <div className="text-primary-light text-lg">
-        sur {total} personne{total > 1 ? 's' : ''} en attente
-      </div>
-    </div>
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+    </svg>
+  )
+}
+function IconBell() {
+  return (
+    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round"
+        d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+    </svg>
+  )
+}
+function IconCheck() {
+  return (
+    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  )
+}
+function IconAlertClock() {
+  return (
+    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <circle cx="12" cy="12" r="9" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3.5 2" />
+      <path strokeLinecap="round" d="M5 3L2 6M22 6l-3-3" />
+    </svg>
+  )
+}
+function IconArrow() {
+  return (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+    </svg>
   )
 }
 
 // ─── BARRE DE PROGRESSION ────────────────────────────────────
 function ProgressBar({ position, total }) {
-  if (!position || !total || total === 0) return null
-  const pct = Math.max(0, Math.min(100, ((total - position) / total) * 100))
+  if (!position || !total || position < 1) return null
+  const pct = Math.round(100 * (1 - (position - 1) / Math.max(total, 1)))
 
   return (
     <div>
-      <div className="flex justify-between text-sm text-slate-500 mb-2">
-        <span>Progression</span>
-        <span>{Math.round(pct)}%</span>
+      <div className="flex justify-between text-xs text-slate-500 mb-2">
+        <span className="font-medium">Progression dans la file</span>
+        <span className="font-semibold text-indigo-600">{pct}%</span>
       </div>
-      <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-700"
-          style={{ width: `${pct}%` }}
+          className="h-full rounded-full transition-all duration-700"
+          style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6366f1, #8b5cf6)' }}
         />
       </div>
     </div>
   )
 }
 
-// ─── ÉTAT APPELÉ ─────────────────────────────────────────────
+// ─── CARTE POSITION (en attente) ─────────────────────────────
+function PositionCard({ position, total }) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center">
+      <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-6">
+        Votre position dans la file
+      </div>
+      <div className="inline-flex items-baseline gap-1 mb-3">
+        <span className="text-7xl font-black text-slate-900 leading-none">{position}</span>
+        <span className="text-2xl text-slate-300 font-light self-end mb-2">
+          {position === 1 ? 'er' : 'ème'}
+        </span>
+      </div>
+      <div className="text-sm text-slate-400 mb-8">
+        sur{' '}
+        <span className="font-semibold text-slate-600">{total}</span>{' '}
+        {total > 1 ? 'personnes' : 'personne'} en attente
+      </div>
+      <ProgressBar position={position} total={total} />
+    </div>
+  )
+}
+
+// ─── CARTE APPELÉ ────────────────────────────────────────────
 function CalledCard({ ticket }) {
   return (
-    <div className="bg-gradient-to-br from-success to-emerald-600 text-white p-10 rounded-2xl text-center animate-pulse"
-         style={{ boxShadow: 'var(--shadow-xl)' }}>
-      <div className="text-6xl mb-4">🔔</div>
-      <div className="text-2xl font-bold mb-2" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-        C'est votre tour !
+    <div
+      className="relative overflow-hidden rounded-2xl p-8 text-center text-white"
+      style={{ background: 'linear-gradient(135deg, #059669 0%, #047857 100%)' }}
+    >
+      {/* Cercles décoratifs d'arrière-plan */}
+      <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full" />
+      <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/5 rounded-full" />
+
+      {/* Icône animée */}
+      <div className="relative w-20 h-20 mx-auto mb-6">
+        <div className="absolute inset-0 rounded-full bg-white/20 animate-ping" style={{ animationDuration: '1.5s' }} />
+        <div className="absolute inset-1 rounded-full bg-white/10" />
+        <div className="relative w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
+          <IconBell />
+        </div>
       </div>
-      <div className="text-emerald-100 text-lg mb-4">
+
+      <div className="text-xs font-bold uppercase tracking-widest text-green-100 mb-2">
+        C'est votre tour
+      </div>
+
+      {/* Numéro guichet mis en valeur */}
+      <div className="text-6xl font-black leading-none mb-1">
+        G.{ticket.guichet?.number ?? '—'}
+      </div>
+      <div className="text-green-100 text-sm mb-7">
         Rendez-vous au guichet {ticket.guichet?.number}
       </div>
-      <div className="bg-white/20 rounded-xl p-4 text-sm">
-        Présentez-vous rapidement, sinon vous serez marqué absent.
+
+      {/* Avertissement */}
+      <div className="relative bg-white/15 backdrop-blur-sm rounded-xl p-3.5 text-xs text-green-50 leading-relaxed border border-white/20">
+        Présentez-vous rapidement — vous serez marqué absent en cas de non-présentation.
       </div>
     </div>
   )
 }
 
-// ─── ÉTAT TRAITÉ ─────────────────────────────────────────────
+// ─── CARTE ABSENT ────────────────────────────────────────────
+function AbsentCard() {
+  return (
+    <div
+      className="relative overflow-hidden rounded-2xl p-8 text-center text-white"
+      style={{ background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)' }}
+    >
+      {/* Cercles décoratifs */}
+      <div className="absolute -top-10 -right-10 w-44 h-44 bg-white/5 rounded-full" />
+      <div className="absolute -bottom-8 -left-8 w-36 h-36 bg-white/5 rounded-full" />
+      <div className="absolute top-4 left-4 w-16 h-16 bg-white/5 rounded-full" />
+
+      {/* Icône */}
+      <div className="relative w-20 h-20 mx-auto mb-6">
+        <div className="absolute inset-0 rounded-full bg-white/20" />
+        <div className="relative w-20 h-20 bg-white/20 rounded-full flex items-center justify-center border border-white/30">
+          <IconAlertClock />
+        </div>
+      </div>
+
+      <div className="text-xs font-bold uppercase tracking-widest text-red-200 mb-2">
+        Ticket expiré
+      </div>
+
+      <h2 className="text-2xl font-black text-white mb-3">Marqué absent</h2>
+
+      <p className="text-sm text-red-100 leading-relaxed mb-7 max-w-xs mx-auto">
+        Vous n'étiez pas présent lors de l'appel de votre numéro. Votre ticket a été annulé.
+      </p>
+
+      {/* Encadré d'info */}
+      <div className="relative bg-white/15 border border-white/20 rounded-xl p-3.5 mb-7 text-xs text-red-50 leading-relaxed">
+        Vous pouvez reprendre un nouveau ticket et vous assurer d'être présent à l'appel.
+      </div>
+
+      <Link
+        to="/nouveau-ticket"
+        className="inline-flex items-center gap-2 bg-white text-red-700 font-bold px-6 py-3 rounded-xl text-sm hover:bg-red-50 transition-colors shadow-sm"
+      >
+        Reprendre un nouveau ticket
+        <IconArrow />
+      </Link>
+    </div>
+  )
+}
+
+// ─── CARTE TRAITÉ ────────────────────────────────────────────
 function ServedCard({ ticket }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-10 text-center"
-         style={{ boxShadow: 'var(--shadow-md)' }}>
-      <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg className="w-10 h-10 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
+    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div className="h-1.5 bg-indigo-500" />
+      <div className="p-8 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mx-auto mb-5 text-indigo-600">
+          <IconCheck />
+        </div>
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Dossier traité</h2>
+        <p className="text-sm text-slate-500 leading-relaxed mb-7">
+          Votre dossier a été pris en charge avec succès.<br />Merci de votre visite.
+        </p>
+        <Link
+          to={`/feedback/${ticket.id}`}
+          className="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors"
+        >
+          Laisser un avis
+          <IconArrow />
+        </Link>
       </div>
-      <h2 className="text-2xl font-bold text-slate-800 mb-2" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-        Ticket traité
-      </h2>
-      <p className="text-slate-500 mb-6">
-        Votre dossier a été traité. Merci de votre visite.
-      </p>
-      {/* Lien feedback */}
-      <Link
-        to={`/feedback/${ticket.id}`}
-        className="inline-block bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-dark transition-colors"
-      >
-        Laisser un avis
-      </Link>
     </div>
   )
 }
@@ -125,7 +230,6 @@ export default function TrackingPage() {
     fetchTicket()
   }, [fetchTicket])
 
-  // Rejoindre la room du service UNE SEULE FOIS une fois le ticket chargé
   useEffect(() => {
     if (!socket || !data || joinedServiceRef.current) return
     const ticket = data.id ? data : data.ticket
@@ -134,13 +238,11 @@ export default function TrackingPage() {
     joinedServiceRef.current = true
   }, [socket, data])
 
-  // Intégration Socket.io
   useEffect(() => {
     if (!socket) return
 
     socket.emit('join-ticket', { ticketNumber })
 
-    // Notre ticket est appelé → recharger pour avoir guichet + nouveau statut
     const handleCalled = (ticketData) => {
       if (ticketData.ticketNumber === ticketNumber) {
         toast.success("🔔 C'est votre tour ! Rendez-vous au guichet.", { duration: 8000 })
@@ -148,22 +250,11 @@ export default function TrackingPage() {
       }
     }
 
-    // Un ticket du même service avance → décrémenter position localement (instantané)
     const handleQueueUpdated = () => {
-      setData(prev => {
-        if (!prev) return prev
-        const currentPos = prev.position
-        const currentTotal = prev.total
-        if (!currentPos || !currentTotal) return prev
-        const newPos = Math.max(1, currentPos - 1)
-        const newTotal = Math.max(0, currentTotal - 1)
-        return { ...prev, position: newPos, total: newTotal }
-      })
+      fetchTicket()
     }
 
-    // Ticket traité ou absent
     const handleTicketCompleted = (ticketData) => {
-      // C'est notre ticket
       if (ticketData.ticketNumber === ticketNumber) {
         if (ticketData.action === 'served') {
           toast.success('✅ Votre dossier a été traité !', { duration: 3000 })
@@ -174,16 +265,7 @@ export default function TrackingPage() {
         }
         return
       }
-      // Sinon → décrémenter la position dans la file
-      setData(prev => {
-        if (!prev) return prev
-        const currentPos = prev.position
-        const currentTotal = prev.total
-        if (!currentPos || !currentTotal) return prev
-        const newPos = Math.max(1, currentPos - 1)
-        const newTotal = Math.max(0, currentTotal - 1)
-        return { ...prev, position: newPos, total: newTotal }
-      })
+      fetchTicket()
     }
 
     socket.on('ticket-called', handleCalled)
@@ -197,32 +279,36 @@ export default function TrackingPage() {
     }
   }, [socket, ticketNumber, fetchTicket])
 
-  // ─── LOADING ────────────────────────────────────────
+  // ─── LOADING ─────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface">
+      <div className="min-h-screen" style={{ backgroundColor: "#cbd5e1" }}>
         <Navbar citizenMode />
-        <div className="max-w-md mx-auto px-4 py-20 text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-500">Chargement de votre ticket...</p>
+        <div className="max-w-md mx-auto px-4 py-24 text-center">
+          <div className="w-10 h-10 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-slate-500">Chargement de votre ticket...</p>
         </div>
       </div>
     )
   }
 
-  // ─── ERREUR ─────────────────────────────────────────
+  // ─── ERREUR ──────────────────────────────────────────
   if (error) {
     return (
-      <div className="min-h-screen bg-surface">
+      <div className="min-h-screen" style={{ backgroundColor: "#cbd5e1" }}>
         <Navbar citizenMode />
-        <div className="max-w-md mx-auto px-4 py-20 text-center">
-          <div className="text-6xl mb-4">😕</div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-3" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-            Ticket introuvable
-          </h2>
-          <p className="text-slate-500 mb-6">{error}</p>
-          <Link to="/nouveau-ticket"
-                className="inline-block bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-dark transition-colors">
+        <div className="max-w-md mx-auto px-4 py-24 text-center">
+          <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-bold text-slate-900 mb-2">Ticket introuvable</h2>
+          <p className="text-sm text-slate-500 mb-6">{error}</p>
+          <Link
+            to="/nouveau-ticket"
+            className="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors"
+          >
             Prendre un nouveau ticket
           </Link>
         </div>
@@ -236,14 +322,17 @@ export default function TrackingPage() {
   const resolvedWait = data.estimatedWait ?? resolvedTicket?.estimatedWait
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen" style={{ backgroundColor: "#cbd5e1" }}>
       <Navbar citizenMode />
 
-      <div className="max-w-md mx-auto px-4 py-10">
+      <div className="max-w-md mx-auto px-4 py-8 space-y-3">
 
-        {/* En-tête ticket */}
-        <div className="text-center mb-6">
-          <div className="text-5xl font-bold text-primary mb-2" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+        {/* ── EN-TÊTE TICKET ─────────────────────────── */}
+        <div className="bg-white rounded-2xl border border-slate-200 px-6 py-5 text-center">
+          <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">
+            Numéro de ticket
+          </div>
+          <div className="text-4xl font-black text-indigo-600 mb-3 tracking-tight">
             {resolvedTicket?.ticketNumber}
           </div>
           <div className="flex items-center justify-center gap-2">
@@ -252,7 +341,7 @@ export default function TrackingPage() {
           </div>
         </div>
 
-        {/* Carte principale selon statut */}
+        {/* ── CARTE PRINCIPALE SELON STATUT ──────────── */}
         {resolvedTicket?.status === 'being_called' && (
           <CalledCard ticket={resolvedTicket} />
         )}
@@ -262,72 +351,45 @@ export default function TrackingPage() {
         )}
 
         {resolvedTicket?.status === 'absent' && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
-            <div className="text-5xl mb-3">⏰</div>
-            <h2 className="text-xl font-bold text-red-700 mb-2" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-              Marqué absent
-            </h2>
-            <p className="text-red-600 text-sm mb-4">
-              Vous étiez absent lors de l'appel de votre ticket.
-            </p>
-            <Link to="/nouveau-ticket"
-                  className="inline-block bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-dark transition-colors">
-              Reprendre un ticket
-            </Link>
-          </div>
+          <AbsentCard />
         )}
 
         {resolvedTicket?.status === 'waiting' && resolvedPosition && (
           <PositionCard position={resolvedPosition} total={resolvedTotal} />
         )}
 
-        {/* Informations supplémentaires (si en attente) */}
-        {resolvedTicket?.status === 'waiting' && (
-          <div className="mt-6 space-y-4">
-
-            {/* Temps estimé */}
-            {resolvedWait != null && (
-              <div className="bg-white rounded-xl border border-slate-200 p-5"
-                   style={{ boxShadow: 'var(--shadow-sm)' }}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm text-slate-500 mb-1">Temps d'attente estimé</div>
-                    <div className="text-2xl font-bold text-slate-800" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                      ~{resolvedWait} min
-                    </div>
-                  </div>
-                  <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center text-accent">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-                    </svg>
-                  </div>
-                </div>
+        {/* ── INFOS SUPPLÉMENTAIRES (en attente) ─────── */}
+        {resolvedTicket?.status === 'waiting' && resolvedWait != null && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs text-slate-400 mb-0.5 font-medium">Temps d'attente estimé</div>
+                <div className="text-2xl font-bold text-slate-900">~{resolvedWait} min</div>
               </div>
-            )}
-
-            {/* Barre de progression */}
-            {resolvedPosition && resolvedTotal && (
-              <div className="bg-white rounded-xl border border-slate-200 p-5"
-                   style={{ boxShadow: 'var(--shadow-sm)' }}>
-                <ProgressBar position={resolvedPosition} total={resolvedTotal} />
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-indigo-500"
+                   style={{ backgroundColor: '#EDE9FE' }}>
+                <IconClock />
               </div>
-            )}
-
-            {/* Indicateur temps réel */}
-            <div className="flex items-center justify-center gap-2 text-sm text-slate-400">
-              <span className="w-2 h-2 bg-success rounded-full animate-pulse" />
-              Mise à jour en temps réel
             </div>
           </div>
         )}
 
-        {/* Informations du ticket */}
-        <div className="mt-6 bg-white rounded-xl border border-slate-200 p-5"
-             style={{ boxShadow: 'var(--shadow-sm)' }}>
-          <h3 className="font-semibold text-slate-700 mb-4 text-sm uppercase tracking-wide">
-            Détails
-          </h3>
-          <div className="space-y-3">
+        {/* ── INDICATEUR TEMPS RÉEL ───────────────────── */}
+        {resolvedTicket?.status === 'waiting' && (
+          <div className="flex items-center justify-center gap-2 py-1">
+            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-xs text-slate-400 font-medium">Mise à jour en temps réel</span>
+          </div>
+        )}
+
+        {/* ── DÉTAILS DU TICKET ───────────────────────── */}
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50/70">
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+              Détails du ticket
+            </h3>
+          </div>
+          <div className="divide-y divide-slate-100">
             {[
               { label: 'Nom', value: resolvedTicket?.citizenName },
               { label: 'Service', value: resolvedTicket?.service?.name },
@@ -336,9 +398,9 @@ export default function TrackingPage() {
                 ? new Date(resolvedTicket.createdAt).toLocaleString('fr-TN')
                 : null },
             ].map(({ label, value }) => value ? (
-              <div key={label} className="flex justify-between items-start">
-                <span className="text-sm text-slate-500">{label}</span>
-                <span className="text-sm text-slate-800 font-medium text-right max-w-[60%]">{value}</span>
+              <div key={label} className="flex justify-between items-center px-5 py-3">
+                <span className="text-xs text-slate-400 font-medium">{label}</span>
+                <span className="text-xs text-slate-800 font-semibold text-right max-w-[60%]">{value}</span>
               </div>
             ) : null)}
           </div>

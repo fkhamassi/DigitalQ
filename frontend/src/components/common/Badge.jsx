@@ -1,14 +1,14 @@
 // src/components/common/Badge.jsx
 
 const VARIANTS = {
-  waiting:      'bg-amber-100 text-amber-700',
-  being_called: 'bg-primary/10 text-primary',
-  served:       'bg-emerald-100 text-emerald-700',
-  absent:       'bg-red-100 text-red-600',
-  priority:     'bg-orange-100 text-orange-600',
-  active:       'bg-emerald-100 text-emerald-700',
-  inactive:     'bg-slate-100 text-slate-500',
-  pause:        'bg-amber-100 text-amber-600',
+  waiting:      'bg-amber-50 text-amber-700 border-amber-200',
+  being_called: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  served:       'bg-green-50 text-green-700 border-green-200',
+  absent:       'bg-red-50 text-red-700 border-red-200',
+  priority:     'bg-orange-50 text-orange-700 border-orange-200',
+  active:       'bg-green-50 text-green-700 border-green-200',
+  inactive:     'bg-slate-50 text-slate-600 border-slate-200',
+  pause:        'bg-amber-50 text-amber-700 border-amber-200',
 }
 
 const LABELS = {
@@ -23,11 +23,11 @@ const LABELS = {
 }
 
 export default function Badge({ variant = 'waiting', label, className = '' }) {
-  const colorClass = VARIANTS[variant] || 'bg-slate-100 text-slate-600'
+  const colorClass = VARIANTS[variant] || 'bg-slate-50 text-slate-600 border-slate-200'
   const displayLabel = label ?? LABELS[variant] ?? variant
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass} ${className}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${colorClass} ${className}`}>
       {displayLabel}
     </span>
   )

@@ -1,5 +1,4 @@
 // src/pages/NewTicketPage.jsx
-// Formulaire de prise de ticket pour le citoyen
 
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -10,16 +9,15 @@ import api from '../api/axios'
 // ─── ICÔNES ──────────────────────────────────────────────────
 function IconCheck() {
   return (
-    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <polyline points="20 6 9 17 4 12" />
     </svg>
   )
 }
 
-// Icône État Civil : carte d'identité / document officiel
 function IconEtatCivil({ className }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <rect x="2" y="4" width="20" height="16" rx="2" />
       <circle cx="8.5" cy="10.5" r="2.5" />
       <path d="M4 20c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" />
@@ -29,10 +27,9 @@ function IconEtatCivil({ className }) {
   )
 }
 
-// Icône Urbanisme : bâtiment / plan
 function IconUrbanisme({ className }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path d="M3 21h18" />
       <path d="M5 21V7l7-4 7 4v14" />
       <rect x="9" y="14" width="6" height="7" />
@@ -42,10 +39,9 @@ function IconUrbanisme({ className }) {
   )
 }
 
-// Icône Finances : pièce / billet
 function IconFinances({ className }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <rect x="2" y="6" width="20" height="12" rx="2" />
       <circle cx="12" cy="12" r="3" />
       <path d="M6 12h.01M18 12h.01" />
@@ -53,10 +49,9 @@ function IconFinances({ className }) {
   )
 }
 
-// Icône Affaires Scolaires : chapeau de diplômé / livre
 function IconAffairesScolaires({ className }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path d="M12 3L2 8l10 5 10-5-10-5z" />
       <path d="M2 8v6c0 2 4.5 4 10 4s10-2 10-4V8" />
       <line x1="22" y1="8" x2="22" y2="14" />
@@ -64,38 +59,21 @@ function IconAffairesScolaires({ className }) {
   )
 }
 
-// Mapping code → icône + config couleur
 const SERVICE_CONFIG = {
   EC: {
     Icon: IconEtatCivil,
-    border: 'border-primary',
-    bg: 'bg-primary/8',
-    iconBg: 'bg-primary/10',
-    text: 'text-primary',
     desc: 'Actes, certificats, légalisations',
   },
   UR: {
     Icon: IconUrbanisme,
-    border: 'border-accent',
-    bg: 'bg-accent/8',
-    iconBg: 'bg-accent/10',
-    text: 'text-accent',
     desc: 'Permis de construire, autorisations',
   },
   FI: {
     Icon: IconFinances,
-    border: 'border-success',
-    bg: 'bg-success/8',
-    iconBg: 'bg-success/10',
-    text: 'text-success',
     desc: 'Taxes, paiements, amendes',
   },
   AS: {
     Icon: IconAffairesScolaires,
-    border: 'border-warning',
-    bg: 'bg-warning/8',
-    iconBg: 'bg-warning/10',
-    text: 'text-warning',
     desc: 'Inscriptions, bourses scolaires',
   },
 }
@@ -104,58 +82,31 @@ const SERVICE_CONFIG = {
 function ServiceCard({ service, selected, onClick }) {
   const config = SERVICE_CONFIG[service.code] || {
     Icon: IconEtatCivil,
-    border: 'border-slate-200',
-    bg: 'bg-surface',
-    iconBg: 'bg-slate-100',
-    text: 'text-slate-600',
     desc: '',
   }
-  const { Icon, border, bg, iconBg, text, desc } = config
+  const { Icon, desc } = config
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`w-full p-5 rounded-xl border-2 text-left transition-all hover:shadow-md group ${
+      className={`w-full p-4 rounded-lg border text-left transition-colors ${
         selected
-          ? `${border} ${bg}`
-          : 'border-slate-200 bg-white hover:border-slate-300'
+          ? 'border-indigo-500 bg-indigo-50'
+          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
       }`}
     >
-      {/* Icône + code */}
-      <div className="flex items-center gap-3 mb-3">
-        <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-          selected ? iconBg : 'bg-slate-100 group-hover:bg-slate-200'
-        }`}>
-          <Icon className={`w-6 h-6 ${selected ? text : 'text-slate-500'}`} />
-        </div>
-        <span className={`text-xs font-bold tracking-widest uppercase ${
-          selected ? text : 'text-slate-400'
-        }`}>
+      <div className="flex items-center gap-2 mb-2">
+        <Icon className={`w-4 h-4 ${selected ? 'text-indigo-600' : 'text-slate-400'}`} />
+        <span className={`text-xs font-bold tracking-widest uppercase ${selected ? 'text-indigo-600' : 'text-slate-400'}`}>
           {service.code}
         </span>
       </div>
-
-      {/* Nom du service */}
-      <div className={`font-semibold text-sm mb-1 ${selected ? 'text-slate-800' : 'text-slate-700'}`}
-           style={{ fontFamily: 'DM Sans, sans-serif' }}>
+      <div className={`font-medium text-sm mb-0.5 ${selected ? 'text-slate-900' : 'text-slate-700'}`}>
         {service.name}
       </div>
-
-      {/* Description */}
-      <div className="text-xs text-slate-400 leading-relaxed mb-2">
-        {desc}
-      </div>
-
-      {/* Temps moyen */}
-      <div className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
-        selected ? `${iconBg} ${text}` : 'bg-slate-100 text-slate-500'
-      }`}>
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-        </svg>
-        ~{service.avgServiceTime} min / personne
-      </div>
+      <div className="text-xs text-slate-400 mb-2">{desc}</div>
+      <div className="text-xs text-slate-500">~{service.avgServiceTime} min / personne</div>
     </button>
   )
 }
@@ -176,7 +127,6 @@ export default function NewTicketPage() {
   })
   const [errors, setErrors] = useState({})
 
-  // Charger les services (routes publiques uniquement)
   useEffect(() => {
     const fetchServices = async () => {
       setLoading(true)
@@ -187,7 +137,6 @@ export default function NewTicketPage() {
         const r4 = await api.get('/api/queue/4')
         setServices([r1.data.service, r2.data.service, r3.data.service, r4.data.service].filter(Boolean))
       } catch {
-        // Services par défaut si l'API échoue
         setServices([
           { id: 1, name: 'État Civil', code: 'EC', avgServiceTime: 7 },
           { id: 2, name: 'Urbanisme', code: 'UR', avgServiceTime: 10 },
@@ -237,37 +186,35 @@ export default function NewTicketPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen" style={{ backgroundColor: "#cbd5e1" }}>
       <Navbar citizenMode />
 
-      <div className="max-w-2xl mx-auto px-4 py-10">
+      <div className="max-w-xl mx-auto px-4 py-8">
 
         {/* En-tête */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-            Prendre un ticket
-          </h1>
-          <p className="text-slate-500">
-            Remplissez le formulaire pour obtenir votre numéro dans la file d'attente.
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold text-slate-900 mb-1">Nouveau ticket</h1>
+          <p className="text-sm text-slate-500">
+            Remplissez le formulaire pour prendre votre place dans la file.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* ── SÉLECTION SERVICE ──────────────────────── */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6" style={{ boxShadow: 'var(--shadow-sm)' }}>
-            <h2 className="font-semibold text-slate-800 mb-4" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+          <div className="bg-white border border-slate-200 rounded-lg p-5">
+            <h2 className="text-sm font-medium text-slate-700 mb-3">
               1. Choisissez votre service
             </h2>
 
             {loading ? (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 {[1,2,3,4].map(i => (
-                  <div key={i} className="h-24 bg-slate-100 rounded-xl animate-pulse" />
+                  <div key={i} className="h-24 bg-slate-100 rounded-lg animate-pulse" />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 {services.map(service => (
                   <ServiceCard
                     key={service.id}
@@ -280,94 +227,96 @@ export default function NewTicketPage() {
             )}
 
             {errors.serviceId && (
-              <p className="text-danger text-sm mt-2">{errors.serviceId}</p>
+              <p className="text-red-600 text-xs mt-2">{errors.serviceId}</p>
             )}
           </div>
 
           {/* ── INFORMATIONS PERSONNELLES ──────────────── */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6" style={{ boxShadow: 'var(--shadow-sm)' }}>
-            <h2 className="font-semibold text-slate-800 mb-4" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+          <div className="bg-white border border-slate-200 rounded-lg p-5">
+            <h2 className="text-sm font-medium text-slate-700 mb-3">
               2. Vos informations
             </h2>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Nom */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Nom complet <span className="text-danger">*</span>
+                <label className="block text-xs font-medium text-slate-600 mb-1">
+                  Nom complet <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={form.citizenName}
                   onChange={e => setField('citizenName', e.target.value)}
-                  placeholder="Ex: Mohamed Ben Ahmed"
-                  className={`w-full px-4 py-3 rounded-lg border text-sm outline-none transition-all
-                    ${errors.citizenName
-                      ? 'border-danger bg-red-50 focus:ring-2 focus:ring-danger/20'
-                      : 'border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20'
-                    }`}
+                  placeholder="Mohamed Ben Ahmed"
+                  className={`w-full px-3 py-2 rounded-md border text-sm outline-none transition-colors ${
+                    errors.citizenName
+                      ? 'border-red-400 bg-red-50'
+                      : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200'
+                  }`}
                 />
                 {errors.citizenName && (
-                  <p className="text-danger text-xs mt-1">{errors.citizenName}</p>
+                  <p className="text-red-600 text-xs mt-1">{errors.citizenName}</p>
                 )}
               </div>
 
               {/* Téléphone */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Numéro de téléphone <span className="text-danger">*</span>
+                <label className="block text-xs font-medium text-slate-600 mb-1">
+                  Numéro de téléphone <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="tel"
                   value={form.citizenPhone}
                   onChange={e => setField('citizenPhone', e.target.value)}
                   placeholder="+216 XX XXX XXX"
-                  className={`w-full px-4 py-3 rounded-lg border text-sm outline-none transition-all
-                    ${errors.citizenPhone
-                      ? 'border-danger bg-red-50 focus:ring-2 focus:ring-danger/20'
-                      : 'border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20'
-                    }`}
+                  className={`w-full px-3 py-2 rounded-md border text-sm outline-none transition-colors ${
+                    errors.citizenPhone
+                      ? 'border-red-400 bg-red-50'
+                      : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200'
+                  }`}
                 />
                 {errors.citizenPhone && (
-                  <p className="text-danger text-xs mt-1">{errors.citizenPhone}</p>
+                  <p className="text-red-600 text-xs mt-1">{errors.citizenPhone}</p>
                 )}
               </div>
 
               {/* Motif */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Motif de la visite <span className="text-danger">*</span>
+                <label className="block text-xs font-medium text-slate-600 mb-1">
+                  Motif de la visite <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={form.motif}
                   onChange={e => setField('motif', e.target.value)}
                   placeholder="Ex: Acte de naissance, Permis de construire..."
-                  className={`w-full px-4 py-3 rounded-lg border text-sm outline-none transition-all
-                    ${errors.motif
-                      ? 'border-danger bg-red-50 focus:ring-2 focus:ring-danger/20'
-                      : 'border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20'
-                    }`}
+                  className={`w-full px-3 py-2 rounded-md border text-sm outline-none transition-colors ${
+                    errors.motif
+                      ? 'border-red-400 bg-red-50'
+                      : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200'
+                  }`}
                 />
                 {errors.motif && (
-                  <p className="text-danger text-xs mt-1">{errors.motif}</p>
+                  <p className="text-red-600 text-xs mt-1">{errors.motif}</p>
                 )}
               </div>
 
               {/* Priorité */}
-              <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-lg border border-orange-100">
+              <label className="flex items-center gap-3 cursor-pointer p-3 rounded-md border border-slate-200 hover:bg-slate-50 transition-colors">
                 <input
                   type="checkbox"
                   id="priority"
                   checked={form.priority}
                   onChange={e => setField('priority', e.target.checked)}
-                  className="w-4 h-4 accent-warning cursor-pointer"
+                  className="w-4 h-4 accent-amber-600 cursor-pointer"
                 />
-                <label htmlFor="priority" className="text-sm text-slate-700 cursor-pointer">
+                <span className="text-sm text-slate-700">
                   <span className="font-medium">Cas prioritaire</span>
-                  <span className="text-slate-500 ml-1">(personne âgée, handicapée, femme enceinte...)</span>
-                </label>
-              </div>
+                  <span className="text-slate-500 text-xs ml-1">
+                    (personne âgée, handicapée, femme enceinte...)
+                  </span>
+                </span>
+              </label>
             </div>
           </div>
 
@@ -375,12 +324,11 @@ export default function NewTicketPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-primary text-white py-4 rounded-xl font-semibold text-lg hover:bg-primary-dark transition-all hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            style={{ fontFamily: 'DM Sans, sans-serif' }}
+            className="w-full bg-indigo-600 text-white py-2.5 rounded-md font-medium text-sm hover:bg-indigo-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {submitting ? (
               <>
-                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
