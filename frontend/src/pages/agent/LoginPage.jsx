@@ -58,7 +58,7 @@ export default function AgentLoginPage() {
           <h1 className="text-xl font-semibold tracking-tight select-none">
             <span className="text-slate-800">Digital</span><span className="text-indigo-600 font-bold">Q</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">Espace agent municipal</p>
+          <p className="text-sm text-slate-500 mt-0.5">Espace agent municipal et admin</p>
         </div>
 
         {/* Card login */}
