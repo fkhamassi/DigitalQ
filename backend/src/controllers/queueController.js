@@ -3,6 +3,32 @@
 
 const prisma = require('../lib/prisma')
 
+async function calculerInfosFile(ticket) {
+  const ticketsEnAttente = await prisma.ticket.findMany({
+    where: {
+      serviceId: ticket.serviceId,
+      status: 'waiting'
+    },
+    orderBy: [
+      { priority: 'desc' },
+      { createdAt: 'asc' },
+      { id: 'asc' }
+    ],
+    select: { id: true }
+  })
+
+  const index = ticketsEnAttente.findIndex(t => t.id === ticket.id)
+
+  if (index === -1) {
+    return { position: null, estimatedWait: null }
+  }
+
+  return {
+    position: index + 1,
+    estimatedWait: index * ticket.service.avgServiceTime
+  }
+}
+
 /**
  * GET /api/queue/:serviceId
  * Retourne la file d'attente complète d'un service
@@ -72,35 +98,17 @@ exports.getPosition = async (req, res) => {
       })
     }
 
-    // Compter les tickets avant celui-ci (prioritaires + anciens)
-    const position = await prisma.ticket.count({
-      where: {
-        serviceId: ticket.serviceId,
-        status: 'waiting',
-        OR: [
-          // Tickets prioritaires qui sont arrivés avant
-          { priority: true, createdAt: { lt: ticket.createdAt } },
-          // Tickets de même priorité arrivés avant ou en même temps
-          {
-            priority: ticket.priority,
-            createdAt: { lte: ticket.createdAt },
-            id: { not: ticket.id }
-          }
-        ]
-      }
-    })
+    const fileInfo = await calculerInfosFile(ticket)
 
     const total = await prisma.ticket.count({
       where: { serviceId: ticket.serviceId, status: 'waiting' }
     })
 
-    const estimatedWait = position * ticket.service.avgServiceTime
-
     res.json({
       ticket,
-      position: position + 1, // 1-indexé pour affichage
+      position: fileInfo.position,
       total,
-      estimatedWait
+      estimatedWait: fileInfo.estimatedWait
     })
   } catch (error) {
     console.error('getPosition error:', error)

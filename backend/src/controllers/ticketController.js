@@ -36,14 +36,47 @@ async function genererNumeroTicket(serviceId) {
 /**
  * Calcule le temps d'attente estimé en minutes
  */
-async function calculerTempsAttente(serviceId) {
+async function calculerTempsAttenteNouveauTicket(serviceId, priority) {
   const service = await prisma.service.findUnique({ where: { id: serviceId } })
 
-  const nbEnAttente = await prisma.ticket.count({
-    where: { serviceId, status: STATUTS.WAITING }
+  const where = {
+    serviceId,
+    status: STATUTS.WAITING
+  }
+
+  if (priority) {
+    where.priority = true
+  }
+
+  const nbTicketsAvant = await prisma.ticket.count({ where })
+
+  return nbTicketsAvant * service.avgServiceTime
+}
+
+async function calculerInfosFile(ticket) {
+  const ticketsEnAttente = await prisma.ticket.findMany({
+    where: {
+      serviceId: ticket.serviceId,
+      status: STATUTS.WAITING
+    },
+    orderBy: [
+      { priority: 'desc' },
+      { createdAt: 'asc' },
+      { id: 'asc' }
+    ],
+    select: { id: true }
   })
 
-  return nbEnAttente * service.avgServiceTime
+  const index = ticketsEnAttente.findIndex(t => t.id === ticket.id)
+
+  if (index === -1) {
+    return { position: null, estimatedWait: null }
+  }
+
+  return {
+    position: index + 1,
+    estimatedWait: index * ticket.service.avgServiceTime
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -73,7 +106,7 @@ exports.createTicket = async (req, res) => {
     const ticketNumber = await genererNumeroTicket(serviceIdInt)
 
     // Calculer le temps d'attente estimé
-    const estimatedWait = await calculerTempsAttente(serviceIdInt)
+    const estimatedWait = await calculerTempsAttenteNouveauTicket(serviceIdInt, priority === true || priority === 'true')
 
     // Créer le ticket
     const ticket = await prisma.ticket.create({
@@ -132,27 +165,19 @@ exports.getTicket = async (req, res) => {
       return res.status(404).json({ error: 'Ticket introuvable' })
     }
 
-    // Calculer la position dans la file
     let position = null
+    let estimatedWait = null
     if (ticket.status === STATUTS.WAITING) {
-      position = await prisma.ticket.count({
-        where: {
-          serviceId: ticket.serviceId,
-          status: STATUTS.WAITING,
-          OR: [
-            // Les tickets prioritaires passent devant
-            { priority: true, createdAt: { lt: ticket.createdAt } },
-            { priority: ticket.priority, createdAt: { lte: ticket.createdAt } }
-          ]
-        }
-      })
+      const fileInfo = await calculerInfosFile(ticket)
+      position = fileInfo.position
+      estimatedWait = fileInfo.estimatedWait
     }
 
     const total = await prisma.ticket.count({
       where: { serviceId: ticket.serviceId, status: STATUTS.WAITING }
     })
 
-    res.json({ ...ticket, position, total })
+    res.json({ ...ticket, position, total, estimatedWait })
   } catch (error) {
     console.error('getTicket error:', error)
     res.status(500).json({ error: 'Erreur interne du serveur' })
