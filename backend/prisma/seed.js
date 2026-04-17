@@ -45,7 +45,7 @@ async function main() {
     data: [
       {
         username: 'fatma.mansour',
-        password: await hash('Fatma@2024'),
+        password: await hash('Fatma@2026'),
         firstName: 'Fatma',
         lastName: 'Mansour',
         email: 'fatma@digitalq.tn',
@@ -54,7 +54,7 @@ async function main() {
       },
       {
         username: 'karim.belhadj',
-        password: await hash('Karim@2024'),
+        password: await hash('Karim@2026'),
         firstName: 'Karim',
         lastName: 'Belhadj',
         email: 'karim@digitalq.tn',
@@ -63,7 +63,7 @@ async function main() {
       },
       {
         username: 'sami.belhaj',
-        password: await hash('Sami@2024'),
+        password: await hash('Sami@2026'),
         firstName: 'Sami',
         lastName: 'Belhaj',
         email: 'sami@digitalq.tn',
@@ -72,7 +72,7 @@ async function main() {
       },
       {
         username: 'rania.ouali',
-        password: await hash('Rania@2024'),
+        password: await hash('Rania@2026'),
         firstName: 'Rania',
         lastName: 'Ouali',
         email: 'rania@digitalq.tn',
@@ -81,7 +81,7 @@ async function main() {
       },
       {
         username: 'nadia.chabbi',
-        password: await hash('Nadia@2024'),
+        password: await hash('Nadia@2026'),
         firstName: 'Nadia',
         lastName: 'Chabbi',
         email: 'nadia@digitalq.tn',
@@ -90,7 +90,7 @@ async function main() {
       },
       {
         username: 'admin',
-        password: await hash('Admin@2024'),
+        password: await hash('Admin@2026'),
         firstName: 'Admin',
         lastName: 'DigitalQ',
         email: 'admin@digitalq.tn',
@@ -100,12 +100,12 @@ async function main() {
   })
 
   console.log('✅ Utilisateurs créés')
-  console.log('   → fatma.mansour / Fatma@2024  (État Civil - Guichet 1)')
-  console.log('   → karim.belhadj / Karim@2024  (État Civil - Guichet 2)')
-  console.log('   → sami.belhaj   / Sami@2024   (Urbanisme - Guichet 1)')
-  console.log('   → rania.ouali   / Rania@2024  (Finances - Guichet 1)')
-  console.log('   → nadia.chabbi  / Nadia@2024  (Affaires Scolaires - Guichet 1)')
-  console.log('   → admin         / Admin@2024  (Administrateur)')
+  console.log('   → fatma.mansour / Fatma@2026  (État Civil - Guichet 1)')
+  console.log('   → karim.belhadj / Karim@2026  (État Civil - Guichet 2)')
+  console.log('   → sami.belhaj   / Sami@2026   (Urbanisme - Guichet 1)')
+  console.log('   → rania.ouali   / Rania@2026  (Finances - Guichet 1)')
+  console.log('   → nadia.chabbi  / Nadia@2026  (Affaires Scolaires - Guichet 1)')
+  console.log('   → admin         / Admin@2026  (Administrateur)')
 
   // ─── TICKETS DE TEST ────────────────────────────────────────
   await prisma.ticket.createMany({
