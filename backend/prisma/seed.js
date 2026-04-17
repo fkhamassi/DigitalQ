@@ -9,6 +9,14 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Début du seed...')
 
+  // Nettoyage pour permettre de relancer le seed sans conflits de données existantes
+  await prisma.feedback.deleteMany()
+  await prisma.ticket.deleteMany()
+  await prisma.user.deleteMany()
+  await prisma.guichet.deleteMany()
+  await prisma.service.deleteMany()
+  await prisma.dailyStats.deleteMany()
+
   // ─── SERVICES ──────────────────────────────────────────────
   const etatCivil = await prisma.service.create({
     data: { name: 'État Civil', code: 'EC', avgServiceTime: 7 }

@@ -145,12 +145,12 @@ Le frontend utilise un proxy Vite vers le backend pour /api et Socket.IO.
 
 Apres npm run prisma:seed, tu peux te connecter avec:
 
-- admin / Admin@2024
-- fatma.mansour / Fatma@2024
-- karim.belhadj / Karim@2024
-- sami.belhaj / Sami@2024
-- rania.ouali / Rania@2024
-- nadia.chabbi / Nadia@2024
+- admin / Admin@2026
+- fatma.mansour / Fatma@2026
+- karim.belhadj / Karim@2026
+- sami.belhaj / Sami@2026
+- rania.ouali / Rania@2026
+- nadia.chabbi / Nadia@2026
 
 ## Scripts utiles
 
